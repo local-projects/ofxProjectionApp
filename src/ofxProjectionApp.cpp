@@ -407,7 +407,7 @@ void ofxProjectionApp::saveCropJsonData(string fileName)
 	ofJson out = jsCropData;
     
 	string ss = "";
-	for (int i = 0; i < jsCropData.size(); i++) ss += jsCropData[i].dump() + "\n";
+	for (int i = 0; i < jsCropData.size(); i++) ss += jsCropData[i].dump(1) + "\n";
 	ofLogNotice() << "Saving crop data" << ss; // cropData.getRawString();
     
     //cropData.save(fileName, true);
@@ -617,7 +617,7 @@ void ofxProjectionApp::loadCropSettings()
 		}
 		catch (exception exc)
 		{
-			ofLogError("ofxProjectionApp::loadNewSettings") << exc.what() << " While parsing " << jsNewCropData.dump(); //newCropData.getRawString();
+			ofLogError("ofxProjectionApp::loadNewSettings") << exc.what() << " While parsing " << jsNewCropData.dump(1); //newCropData.getRawString();
 		}
 
 		//! Notify CropManager & GUIManager to update the interfaces
