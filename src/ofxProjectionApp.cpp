@@ -366,14 +366,14 @@ void ofxProjectionApp::setupCropJsonData()
     
     for(int i = 0; i < cropMan->getCropDataSize(); i++)
     {
-        ofxJSONElement data;
-        data["warpID"] = ofxJSONElement();
-        data["width"] = ofxJSONElement();
-        data["height"] = ofxJSONElement();
-        data["xPos"] = ofxJSONElement();
-        data["yPos"] = ofxJSONElement();
-        
-        cropData.append(data);
+		ofJson js;
+		js["warpID"] = 0;
+		js["width"] = 0.0f;
+		js["height"] = 0.0f;
+		js["xPos"] = 0.0f;
+		js["yPos"] = 0.0f;
+
+		jsCropData.push_back(js);
     }
     
 }
@@ -382,33 +382,36 @@ void ofxProjectionApp::clearCropJsonData()
 {
     for(int i = 0; i < cropMan->getCropDataSize(); i++)
     {
-        cropData[i]["warpID"] = "";
-        cropData[i]["width"] = "";
-        cropData[i]["height"] = "";
-        cropData[i]["xPos"] = "";
-        cropData[i]["yPos"] = "";
+		jsCropData[i]["warpID"] = 0;
+		jsCropData[i]["width"] = 0.0f;
+		jsCropData[i]["height"] = 0.0f;
+		jsCropData[i]["xPos"] = 0.0f;
+		jsCropData[i]["yPos"] = 0.0f;
     }
 }
 
 void ofxProjectionApp::saveCropJsonData(string fileName)
 {
     
-    
     for(int i = 0; i < cropMan->getCropDataSize(); i++)
     {
-        cropData[i]["warpID"] = cropMan->getCropData(i).index;
-        cropData[i]["width"] = cropMan->getCropData(i).size.x;
-        cropData[i]["height"] = cropMan->getCropData(i).size.y;
-        cropData[i]["xPos"] = cropMan->getCropData(i).pos.x;
-        cropData[i]["yPos"] = cropMan->getCropData(i).pos.y;
-        cropData[i]["drawPosX"] = cropMan->getCropData(i).drawPos.x;
-        cropData[i]["drawPosY"] = cropMan->getCropData(i).drawPos.y;
+		jsCropData[i]["warpID"] = cropMan->getCropData(i).index;
+		jsCropData[i]["width"] = cropMan->getCropData(i).size.x;
+		jsCropData[i]["height"] = cropMan->getCropData(i).size.y;
+		jsCropData[i]["xPos"] = cropMan->getCropData(i).pos.x;
+		jsCropData[i]["yPos"] = cropMan->getCropData(i).pos.y;
+		jsCropData[i]["drawPosX"] = cropMan->getCropData(i).drawPos.x;
+		jsCropData[i]["drawPosY"] = cropMan->getCropData(i).drawPos.y;
     }
+
+	ofJson out = jsCropData;
     
-    ofLogNotice() << "Saving " << cropData.getRawString();
+	string ss = "";
+	for (int i = 0; i < jsCropData.size(); i++) ss += jsCropData[i].dump() + "\n";
+	ofLogNotice() << "Saving crop data" << ss; // cropData.getRawString();
     
-    cropData.save(fileName, true);
-    
+    //cropData.save(fileName, true);
+	ofSaveJson(ofToDataPath(fileName), out);
     
 }
 
@@ -571,34 +574,39 @@ void ofxProjectionApp::loadCropSettings()
 
 	ofLogNotice("ofxProjectionApp::loadCropSettings") << "Loading crop settings: " << cropPath;
 
-	ofxJSONElement newCropData;
-	bool parseNewCropData = newCropData.open(cropPath);
+	//ofxJSONElement newCropData;
+	ofJson jsNewCropData;
+	ofFile file(ofToDataPath(cropPath));
+	file >> jsNewCropData;
+
+	//bool parseNewCropData = newCropData.open(cropPath);
 
 
-	if (parseNewCropData)
+	if (true) //parseNewCropData)
 	{
 		try
 		{
 
 			//Resize crop data
-			cropMan->resizeCropDataVector(newCropData.size());
+			cropMan->resizeCropDataVector(jsNewCropData.size());
 
-			for (int i = 0; i < newCropData.size(); i++)
+			for (int i = 0; i < jsNewCropData.size(); i++)
 			{
 
 
 				CroppingManager::CropInfo temp;
 
-				temp.index = newCropData[i]["warpID"].asInt();
-				temp.size.x = newCropData[i]["width"].asFloat();
-				temp.size.y = newCropData[i]["height"].asFloat();
-				temp.pos.x = newCropData[i]["xPos"].asFloat();
-				temp.pos.y = newCropData[i]["yPos"].asFloat();
+				temp.index = jsNewCropData[i]["warpID"];
+				temp.size.x = jsNewCropData[i]["width"];
+				temp.size.y = jsNewCropData[i]["height"];
+				temp.pos.x = jsNewCropData[i]["xPos"];
+				temp.pos.y = jsNewCropData[i]["yPos"];
                 
-                if(newCropData[i].isMember("drawPosX"))
+                //if(jsNewCropData[i].isMember("drawPosX"))
+				if (jsNewCropData[i].find("drawPosX") != jsNewCropData[i].end())
                 {
-                    temp.drawPos.x = newCropData[i]["drawPosX"].asFloat();
-                    temp.drawPos.y = newCropData[i]["drawPosY"].asFloat();
+                    temp.drawPos.x = jsNewCropData[i]["drawPosX"];
+                    temp.drawPos.y = jsNewCropData[i]["drawPosY"];
                 }
                 
 				cropMan->updateCropData(temp, i);
@@ -609,7 +617,7 @@ void ofxProjectionApp::loadCropSettings()
 		}
 		catch (exception exc)
 		{
-			ofLogError("ofxProjectionApp::loadNewSettings") << exc.what() << " While parsing " << newCropData.getRawString();
+			ofLogError("ofxProjectionApp::loadNewSettings") << exc.what() << " While parsing " << jsNewCropData.dump(); //newCropData.getRawString();
 		}
 
 		//! Notify CropManager & GUIManager to update the interfaces

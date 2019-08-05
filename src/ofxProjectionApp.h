@@ -10,10 +10,9 @@
 #include "ofMain.h"
 #include "ofxWarp.h"
 #include "ofxNotificationCenter.h"
-#include "ofxJson.h"
+//#include "ofxJson.h"
 #include "ofxInterface.h"
 #include "EdgeBlend.h"
-#include "ofxJson.h"
 #include "CroppingManager.h"
 #include "ProjectorManager.h"
 #include "MainGUI.h"
@@ -110,7 +109,8 @@ protected:
     /*
      Crop Data
      */
-    ofxJSONElement cropData;
+	vector<ofJson> jsCropData;
+    //ofxJSONElement cropData;
     void setupCropJsonData();
     void clearCropJsonData();
     void saveCropJsonData(string fileName);
