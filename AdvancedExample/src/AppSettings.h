@@ -8,7 +8,6 @@
 
 #pragma once
 #include "ofMain.h"
-#include "ofxJson.h"
 #include "AppStructs.h"
 
 class AppSettings
@@ -62,7 +61,8 @@ private:
     /*
      Json Element
      */
-    ofxJSONElement jsonRef;
-    string configPath = "AppSettings.json";
+	ofJson jsRef;
+    //ofxJSONElement jsonRef;
+    string configPath = "ProjectionAppSettings.json";
     
 };

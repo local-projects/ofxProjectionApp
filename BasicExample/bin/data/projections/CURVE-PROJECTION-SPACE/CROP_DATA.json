@@ -1,0 +1,30 @@
+[
+   {
+      "drawPosX" : 0.0,
+      "drawPosY" : 0.0,
+      "height" : 2160.0,
+      "warpID" : 0,
+      "width" : 2837.333251953125,
+      "xPos" : 0.0,
+      "yPos" : 0.0
+   },
+   {
+      "drawPosX" : 0.0,
+      "drawPosY" : 0.0,
+      "height" : 1900.800048828125,
+      "warpID" : 1,
+      "width" : 2425.919921875,
+      "xPos" : 0.0,
+      "yPos" : 0.0
+   },
+   {
+      "drawPosX" : 0.0,
+      "drawPosY" : 0.0,
+      "height" : 1900.800048828125,
+      "warpID" : 2,
+      "width" : 3976.806396484375,
+      "xPos" : 2346.758544921875,
+      "yPos" : 0.0
+   }
+]
+

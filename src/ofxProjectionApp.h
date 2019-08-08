@@ -16,6 +16,7 @@
 #include "CroppingManager.h"
 #include "ProjectorManager.h"
 #include "MainGUI.h"
+#include "ofxTimeMeasurements.h"
 
 class ofxProjectionApp
 {

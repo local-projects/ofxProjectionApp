@@ -7,15 +7,6 @@
 		<ClCompile Include="src\main.cpp">
 			<Filter>src</Filter>
 		</ClCompile>
-		<ClCompile Include="src\AppSettings.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
-		<ClCompile Include="src\CanvasManager.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
-		<ClCompile Include="src\Global.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
 		<ClCompile Include="src\main.cpp">
 			<Filter>src</Filter>
 		</ClCompile>
@@ -366,21 +357,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ClInclude Include="src\ofApp.h">
-			<Filter>src</Filter>
-		</ClInclude>
-		<ClInclude Include="src\AppSettings.h">
-			<Filter>src</Filter>
-		</ClInclude>
-		<ClInclude Include="src\AppStructs.h">
-			<Filter>src</Filter>
-		</ClInclude>
-		<ClInclude Include="src\CanvasManager.h">
-			<Filter>src</Filter>
-		</ClInclude>
-		<ClInclude Include="src\CustomApp.h">
-			<Filter>src</Filter>
-		</ClInclude>
-		<ClInclude Include="src\Global.h">
 			<Filter>src</Filter>
 		</ClInclude>
 		<ClInclude Include="src\ofApp.h">

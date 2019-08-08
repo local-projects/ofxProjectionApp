@@ -11,6 +11,5 @@ ofxXmlSettings
 ../../../ExternalAddons/ofxDatGui
 ../../../ExternalAddons/ofxInterface
 ../../../ExternalAddons/ofxWarp
-../../../ExternalAddons/ofxJSON
 ../../../ExternalAddons/ofxNotificationCenter
 ../../../ExternalAddons/ofxProjectionApp

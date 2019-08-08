@@ -243,6 +243,7 @@ void ofxProjectionApp::setupGuiManager(vector<string> &appStates)
 
 void ofxProjectionApp::update()
 {
+	TS_START("ProjectionApp - Update - GUI State");
     switch(guiState)
     {
         case GUIStates::EDGE_BLEND_GUI_OPEN: {
@@ -254,23 +255,36 @@ void ofxProjectionApp::update()
         case GUIStates::EDGE_BLEND_GUIS_CLOSED: {break;}
         default: break;
     }
+	TS_STOP("ProjectionApp - Update - GUI State");
     
     //Update Edge blending params
     
+	TS_START("ProjectionApp - Update - Blending");
     for(int i =0; i < warpController->getNumWarps(); i++)
     {
-        auto warp = warpController->getWarp(i);
-        
-		if (warp && i < edgeGuis.size())
+		std::shared_ptr<ofxWarp::WarpBase> warp;
+		//TS_START_ACC("ProjectionApp - Update - Blending - GetWarp");
+		warp = warpController->getWarp(i);
+		//TS_STOP_ACC("ProjectionApp - Update - Blending - GetWarp");
+		
+		//TS_START_ACC("ProjectionApp - Update - Blending - SetBlends");
+		if (warp && i < edgeGuis.size() && guiState == GUIStates::EDGE_BLEND_GUI_OPEN)
 		{
 			//Edge Blending
+			//TS_START_ACC("ProjectionApp - Update - Blending - SetBlends - Gamma");
 			warp->setGamma(edgeGuis[i]->getGamma());
+			//TS_STOP_ACC("ProjectionApp - Update - Blending - SetBlends - Gamma");
+			//TS_START_ACC("ProjectionApp - Update - Blending - SetBlends - Edges");
 			warp->setEdges(edgeGuis[i]->getEdges());
+			//TS_STOP_ACC("ProjectionApp - Update - Blending - SetBlends - Edges");
+			//TS_START_ACC("ProjectionApp - Update - Blending - SetBlends - Exp");
 			warp->setExponent(edgeGuis[i]->getExponent());
+			//TS_STOP_ACC("ProjectionApp - Update - Blending - SetBlends - Exp");
 		}
-   
+		//TS_STOP_ACC("ProjectionApp - Update - Blending - SetBlends");
         
     }
+	TS_STOP("ProjectionApp - Update - Blending");
 }
 
 void ofxProjectionApp::draw()

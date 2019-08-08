@@ -4,6 +4,7 @@
 #include "ofxProjectionApp.h"
 #include "ofxInterface.h"
 #include "ofxNotificationCenter.h"
+#include "ofxTimeMeasurements.h"
 
 class ofApp : public ofBaseApp{
 

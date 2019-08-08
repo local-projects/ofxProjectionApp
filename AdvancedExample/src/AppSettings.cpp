@@ -25,65 +25,52 @@ void AppSettings::setup()
      Parse Json
      */
     
-    bool parsingJson = jsonRef.open(configPath);
+    //bool parsingJson = jsonRef.open(configPath);
     
-    if(parsingJson)
+	ofFile file(configPath);
+    if(file.exists())
     {
-        ofLogNotice("App_Settings::setup") << "Succesfully initial parse of " << configPath << " with data: " << jsonRef.getRawString();
+		file >> jsRef;
+        ofLogNotice("App_Settings::setup") << "Succesfully initial parse of " << configPath << " with data: " << jsRef.dump(1);
         
         try
         {
-            const ofxJSONElement & appSettings = jsonRef["Configurable"];
+            ofJson appSettings = jsRef["Configurable"];
             
             /*
              App Section
              */
-            const ofxJSONElement & app = appSettings["app"];
-            const ofxJSONElement & _testing = app["testing"];
-            const ofxJSONElement & _logToFile = app["logToFile"];
-            
-            testing = _testing.asBool();
-            logToFile = _logToFile.asBool();
+            ofJson app = appSettings["app"];
+			testing = app["testing"];
+			logToFile = app["logToFile"];
             
             /*
              Window section
              */
-            const ofxJSONElement & window = appSettings["window"];
-            const ofxJSONElement & _fullscreen = window["fullscreen"];
-            const ofxJSONElement & _windowMode = window["windowMode"];
-            const ofxJSONElement & _appWidth = window["appWidth"];
-            const ofxJSONElement & _appHeight = window["appHeight"];
-            const ofxJSONElement & _scaleDenominator = window["scale-denominator"];
-            
-            fullScreen = _fullscreen.asBool();
-            windowMode = _windowMode.asInt();
-            appSize.set(_appWidth.asFloat(), _appHeight.asFloat());
-            scaleDenominator = _scaleDenominator.asFloat();
+            ofJson window = appSettings["window"];
+			fullScreen = window["fullscreen"];
+			windowMode = window["windowMode"];
+			appSize.set(window["appWidth"], window["appHeight"]);
+			scaleDenominator = window["scale-denominator"];
             
             /*
              Canvas
              */
-            const ofxJSONElement & _canvasSize = appSettings["canvasSize"];
-            const ofxJSONElement & _canvasWidth = _canvasSize["width"];
-            const ofxJSONElement & _canvasHeight = _canvasSize["height"];
-            
-            canvasSize.set(_canvasWidth.asFloat(), _canvasHeight.asFloat());
+            ofJson _canvasSize = appSettings["canvasSize"];
+            canvasSize.set(_canvasSize["width"], _canvasSize["height"]);
             
             /*
              Warp Settings
              */
-            const ofxJSONElement & warpSettings = appSettings["warpSettings"];
-            const ofxJSONElement & _warpDirectoryPath = warpSettings["directoryPath"];
-            const ofxJSONElement & _loadWarpSettingsFromFile = warpSettings["loadFromFile"];
-            
-            warpDirectoryPath = _warpDirectoryPath.asString();
-            loadWarpSettingsFromFile = _loadWarpSettingsFromFile.asBool();
+            ofJson warpSettings = appSettings["warpSettings"];
+			warpDirectoryPath = warpSettings["directoryPath"];
+			loadWarpSettingsFromFile = warpSettings["loadFromFile"];
             
             
             /*
              Projectors
              */
-            const ofxJSONElement & projectorsList = appSettings["projectors"];
+            ofJson projectorsList = appSettings["projectors"];
             
             for(int i=0; i < projectorsList.size(); i++)
             {
@@ -93,21 +80,19 @@ void AppSettings::setup()
             
             for(int i=0; i < projectors.size(); i++)
             {
-                const ofxJSONElement & proj = projectorsList[i];
-                const ofxJSONElement & _order= proj["order"];
-                const ofxJSONElement & width = proj["width"];
-                const ofxJSONElement & height = proj["height"];
-                const ofxJSONElement & numWarps = proj["warps"];
-                
-                int order = _order.asInt();
-                
+                ofJson proj = projectorsList[i];
+				int order = proj["order"];
+                float width = proj["width"];
+                float height = proj["height"];
+                int numWarps = proj["warps"];
+             
                 if(order < projectors.size())
                 {
                     
                     projectors[order].order = order;
-                    projectors[order].size.set(width.asFloat(), height.asFloat());
-                    projectors[order].numWarps = numWarps.asInt();
-                    numCrops += numWarps.asInt();
+                    projectors[order].size.set(width, height);
+                    projectors[order].numWarps = numWarps;
+                    numCrops += numWarps;
                     
                     ofLogNotice("AppSettings::setup") << "Adding projector # " << order << " with (width, height): " << projectors[order].size << " & " << numWarps << " warps";
                     

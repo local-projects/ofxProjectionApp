@@ -14,8 +14,8 @@ void ofApp::setup(){
     
     //Set up FBO
     ofFbo::Settings fboSettings;
-    fboSettings.width = ofGetWidth();
-    fboSettings.height = ofGetHeight();
+    fboSettings.width = 3840;
+    fboSettings.height = 1080;
     fboSettings.useDepth = false;
     fboSettings.textureTarget = GL_TEXTURE_RECTANGLE_ARB; //mipmaps!
     fboSettings.numSamples = 8;
@@ -48,16 +48,21 @@ void ofApp::setup(){
     
     //Add projectors to projector manager
     ProjectorManager::one().addProjector(0, //order
-                                         2, //numWarps
-                                         ofVec2f(ofGetWidth(), ofGetHeight()), //projector resolution
+                                         1, //numWarps
+                                         ofVec2f(1920, 1080), //projector resolution
                                          ofVec2f(0.0f, 0.0f)); // projector position
+	ProjectorManager::one().addProjector(
+		1, //order
+		1, //numWarps
+		ofVec2f(1920, 1080), //projector resolution
+		ofVec2f(0.0f, 0.0f)); // projector position
     
     projections->setup(canvas, //ofFbo * _canvasRef
-                       false, //bool _loadFromFile
-                       ofVec2f(ofGetWidth(), ofGetHeight()), //ofVec2f _appSize
+                       true, //bool _loadFromFile
+                       ofVec2f(3840, 1080), //ofVec2f _appSize
                        1.0f, //float _scaleDenominator
                        scene, //ofxInterface::Node* _sceneRef
-                       ""); //string _directoryPath
+                       "PROJECTIONS"); //string _directoryPath
     
 
     /*
@@ -105,12 +110,12 @@ void ofApp::draw(){
         //Draw whatever you want here!
         ofClear(0,0,0,0);
         
-        ofSetColor(0.0f);
+        ofSetColor(255,200,200);
         ofDrawRectangle(0.0f, 0.0f, canvas->getWidth(), canvas->getWidth()); 
         
-        ofSetColor(ofColor::pink);
-        float size = 100.0f;
-        ofDrawCircle(ofGetWidth()/2 - size/2, ofGetHeight()/2 - size/2, size, size);
+        ofSetColor(255,255,0);
+		float size = 600;
+        ofDrawCircle(ofGetWidth()/2 - size/2, ofGetHeight()/2 - size/2, size);
         
     }
     canvas->end();
@@ -231,6 +236,7 @@ void ofApp::onEveryTouchDown(ofxInterface::TouchEvent &event)
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+	if (key == 't') ofToggleFullscreen();
 
 }
 
