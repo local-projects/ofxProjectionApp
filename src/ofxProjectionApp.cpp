@@ -187,10 +187,7 @@ void ofxProjectionApp::setupWarps()
     ofxNotificationCenter::one().addObserver(this, &ofxProjectionApp::onLoadSettings, IDManager::one().loadProjSetting_id);
     
     ofxNotificationCenter::one().addObserver(this, &ofxProjectionApp::onCloseEdgeBlendGui, IDManager::one().edgeBlendGui_id);
-    
-    //Debug purposes
-    debugImg.load("testcard.png");
-    
+        
     
     //setupCroppingManager();
     
@@ -286,28 +283,18 @@ void ofxProjectionApp::draw()
             
             if( i < cropMan->getCropDataSize() )
             {
-                //(<#float x#>, <#float y#>, <#float w#>, <#float h#>, <#float sx#>, <#float sy#>, <#float sw#>, <#float sh#>)
-                
-                if(!debugImage)
-                {
-                    ofClear(0,0,0,0);
-                    ofVec2f cropPos = cropMan->getCropData(i).pos;
-                    ofVec2f drawPos = ofVec2f(cropMan->getCropData(i).drawPos.x*bounds.width, cropMan->getCropData(i).drawPos.y*bounds.height);
-                    ofVec2f size = cropMan->getCropData(i).size;
-                    
-                    canvasRef->getTexture().drawSubsection(bounds.x + drawPos.x,
-                                                           bounds.y + drawPos.y,
-                                                           bounds.width, bounds.height,
-                                                           cropPos.x, cropPos.y,
-                                                           size.x, size.y);
-                }
-                else
-                {
-                    
-                    debugImg.draw(bounds.x, bounds.y, bounds.width, bounds.height);
-                    
-                }
-                
+
+				ofClear(0,0,0,0);
+				ofVec2f cropPos = cropMan->getCropData(i).pos;
+				ofVec2f drawPos = ofVec2f(cropMan->getCropData(i).drawPos.x*bounds.width, cropMan->getCropData(i).drawPos.y*bounds.height);
+				ofVec2f size = cropMan->getCropData(i).size;
+
+				canvasRef->getTexture().drawSubsection(bounds.x + drawPos.x,
+													   bounds.y + drawPos.y,
+													   bounds.width, bounds.height,
+													   cropPos.x, cropPos.y,
+													   size.x, size.y);
+
             }
             else
             {
