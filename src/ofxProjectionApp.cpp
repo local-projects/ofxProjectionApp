@@ -219,13 +219,18 @@ void ofxProjectionApp::setupEdges()
      */
     for(int i = 0; i < warpController->getNumWarps(); i++)
     {
-        //Set up edge GUIs
-        EdgeBlend *temp = new EdgeBlend();
-        temp->setup(i);
-        edgeGuis.push_back(temp);
-        //Cycle through edges based on edge type
-        
-        
+		// If this edge already exists, there is no need to create a new one.
+		if (i < edgeGuis.size()) {
+			continue;
+		}
+		else {
+			// Setup an edge gui
+			EdgeBlend* temp = new EdgeBlend();
+			temp->setup(i);
+			edgeGuis.push_back(temp);
+			//Cycle through edges based on edge type
+
+		}
     }
 }
 
@@ -261,9 +266,7 @@ void ofxProjectionApp::update()
 			warp->setGamma(edgeGuis[i]->getGamma());
 			warp->setEdges(edgeGuis[i]->getEdges());
 			warp->setExponent(edgeGuis[i]->getExponent());
-		}
-   
-        
+		}     
     }
 }
 
