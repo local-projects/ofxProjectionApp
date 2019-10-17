@@ -340,6 +340,10 @@ void ofxProjectionApp::setMainGuiVisible(bool visibility)
     guiMan->getGui()->setVisible(visibility); 
 }
 
+bool ofxProjectionApp::isMainGuiVisible(){
+	return guiMan->getGui()->getVisible();
+}
+
 
 #pragma mark CROP DATA
 void ofxProjectionApp::setupCropJsonData()

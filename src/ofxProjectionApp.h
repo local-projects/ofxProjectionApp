@@ -63,6 +63,7 @@ public:
      */
     void setCropManagerVisible(bool visiblity);
     void setMainGuiVisible(bool visibility);
+	bool isMainGuiVisible();
     
 	/*
 	Warping
