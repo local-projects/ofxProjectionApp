@@ -263,7 +263,7 @@ void MainGUI::onSliderEvent(ofxDatGuiSliderEvent e)
 {
     ofLogNotice("MainGUI::onSliderEvent") << "New event from " << e.target->getLabel();
     
-    if(e.target->getLabel() == ofToUpper(croppingManSize_slider))
+    if(e.target->getLabel() == croppingManSize_slider)
     {
         //Send event via notification center
         ofxNotificationCenter::Notification mnd;
@@ -274,7 +274,7 @@ void MainGUI::onSliderEvent(ofxDatGuiSliderEvent e)
         
         ofLogNotice("MainGUI::onSliderEvent") << "Updated cropping interface scale to " << e.value;
     }
-    else if(e.target->getLabel() == ofToUpper(cropWidth))
+    else if(e.target->getLabel() == cropWidth)
     {
         //Send event via notification center
         ofxNotificationCenter::Notification mnd;
@@ -286,7 +286,7 @@ void MainGUI::onSliderEvent(ofxDatGuiSliderEvent e)
         ofxNotificationCenter::one().postNotification(IDManager::one().cropWidth_id, mnd);
         
     }
-    else if(e.target->getLabel() == ofToUpper(cropHeight))
+    else if(e.target->getLabel() == cropHeight)
     {
         //Send event via notification center
         ofxNotificationCenter::Notification mnd;
@@ -298,7 +298,7 @@ void MainGUI::onSliderEvent(ofxDatGuiSliderEvent e)
         ofxNotificationCenter::one().postNotification(IDManager::one().cropHeight_id, mnd);
         
     }
-    else if(e.target->getLabel() == ofToUpper(cropXpos))
+    else if(e.target->getLabel() == cropXpos)
     {
         //Send event via notification center
         ofxNotificationCenter::Notification mnd;
@@ -310,7 +310,7 @@ void MainGUI::onSliderEvent(ofxDatGuiSliderEvent e)
         ofxNotificationCenter::one().postNotification(IDManager::one().cropXpos_id, mnd);
         
     }
-    else if(e.target->getLabel() == ofToUpper(cropYpos))
+    else if(e.target->getLabel() == cropYpos)
     {
         //Send event via notification center
         ofxNotificationCenter::Notification mnd;
@@ -335,7 +335,7 @@ void MainGUI::onSliderEvent(ofxDatGuiSliderEvent e)
         ofLogNotice("MainGUI::onSliderEvent") << "Updated crop cropYpos scale to: " << e.value;
         
     }
-    else if(e.target->getLabel() == ofToUpper(posOfCropInWarp_X))
+    else if(e.target->getLabel() == posOfCropInWarp_X)
     {
         //Send event via notification center
         ofxNotificationCenter::Notification mnd;
@@ -347,7 +347,7 @@ void MainGUI::onSliderEvent(ofxDatGuiSliderEvent e)
         ofxNotificationCenter::one().postNotification(IDManager::one().posOfCropInWarp_X_id, mnd);
         
     }
-    else if(e.target->getLabel() == ofToUpper(posOfCropInWarp_Y))
+    else if(e.target->getLabel() == posOfCropInWarp_Y)
     {
         //Send event via notification center
         ofxNotificationCenter::Notification mnd;
