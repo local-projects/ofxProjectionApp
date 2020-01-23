@@ -92,7 +92,7 @@ private:
      
      fullPath = projectionDirectory + currentDirectory;
      */
-    string projectionDirectory = "projections";
+    string projectionDirectory = "configs/projections";
     string currentDirectory = "";
 
 };
