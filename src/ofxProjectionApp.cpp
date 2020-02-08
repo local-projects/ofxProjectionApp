@@ -239,20 +239,26 @@ void ofxProjectionApp::setupGuiManager(vector<string> &appStates)
 
 void ofxProjectionApp::update()
 {
-    switch(guiState)
-    {
-        case GUIStates::EDGE_BLEND_GUI_OPEN: {
-            
-            
-            
-            break;
-        }
-        case GUIStates::EDGE_BLEND_GUIS_CLOSED: {break;}
-        default: break;
-    }
-    
+
+	//disable warp mouse when messing with imgui
+	if(guiMan->getCaptureMouse()){
+		warpController->setIgnoreMouseInteractions(true);
+	}else{
+		switch(guiState){
+			case GUIStates::EDGE_BLEND_GUI_OPEN: warpController->setIgnoreMouseInteractions(true); break;
+			case GUIStates::EDGE_BLEND_GUIS_CLOSED: warpController->setIgnoreMouseInteractions(false); break;
+			default: break;
+		}
+	}
+
     //Update Edge blending params
-    
+
+	int newNumWarp = warpController->getNumWarps();
+
+	if(numWarps != newNumWarp){
+		guiMan->updateNumWarps(newNumWarp);
+	}
+
     for(int i =0; i < warpController->getNumWarps(); i++)
     {
         auto warp = warpController->getWarp(i);
@@ -265,50 +271,56 @@ void ofxProjectionApp::update()
 			warp->setExponent(edgeGuis[i]->getExponent());
 		}     
     }
+
+	if(guiMan) guiMan->update();
 }
 
 void ofxProjectionApp::draw()
 {
     int numWarps = warpController->getNumWarps();
-    
-    for(int i =0; i < numWarps; i++)
-    {
-        auto warp = warpController->getWarp(i);
-        
-        warp->begin();
-        {
-            
-            //Get warp bounds to draw into
-            auto bounds = warp->getBounds();
-            
-            //ofSetColor(ofColor::red);
-            //ofDrawRectangle(bounds.x, bounds.y, bounds.width, bounds.height);
-            
-            if( i < cropMan->getCropDataSize() )
-            {
 
-				ofClear(0,0,0,0);
-				ofVec2f cropPos = cropMan->getCropData(i).pos;
-				ofVec2f drawPos = ofVec2f(cropMan->getCropData(i).drawPos.x*bounds.width, cropMan->getCropData(i).drawPos.y*bounds.height);
-				ofVec2f size = cropMan->getCropData(i).size;
+	vector<bool> warpVis = guiMan->getWarpVisibility();
 
-				canvasRef->getTexture().drawSubsection(bounds.x + drawPos.x,
-													   bounds.y + drawPos.y,
-													   bounds.width, bounds.height,
-													   cropPos.x, cropPos.y,
-													   size.x, size.y);
+	if(warpVis.size() != numWarps){
+		return;
+	}
 
-            }
-            else
-            {
-                ofLogError("ofxProjectionApp::draw") << "There are more warps then cropData!";
-            }
-            
-        }
-        warp->end();
-        
+    for(int i =0; i < numWarps; i++){
+
+		auto warp = warpController->getWarp(i);
+		if(warpVis[i]){
+
+			warp->begin();{
+
+				//Get warp bounds to draw into
+				auto bounds = warp->getBounds();
+
+				//ofSetColor(ofColor::red);
+				//ofDrawRectangle(bounds.x, bounds.y, bounds.width, bounds.height);
+
+				if( i < cropMan->getCropDataSize() ){
+
+					ofClear(0,0,0,0);
+					ofVec2f cropPos = cropMan->getCropData(i).pos;
+					ofVec2f drawPos = ofVec2f(cropMan->getCropData(i).drawPos.x*bounds.width, cropMan->getCropData(i).drawPos.y*bounds.height);
+					ofVec2f size = cropMan->getCropData(i).size;
+
+					canvasRef->getTexture().drawSubsection(bounds.x + drawPos.x,
+														   bounds.y + drawPos.y,
+														   bounds.width, bounds.height,
+														   cropPos.x, cropPos.y,
+														   size.x, size.y);
+				}
+				else
+				{
+					ofLogError("ofxProjectionApp::draw") << "There are more warps then cropData!";
+				}
+			}
+			warp->end();
+		}
     }
-    
+
+	if(guiMan) guiMan->draw();
 }
 
 #pragma mark GUI STATES
@@ -340,11 +352,11 @@ void ofxProjectionApp::setCropManagerVisible(bool visiblity)
 
 void ofxProjectionApp::setMainGuiVisible(bool visibility)
 {
-    guiMan->getGui()->setVisible(visibility); 
+	guiMan->setGuiVisible(visibility);
 }
 
 bool ofxProjectionApp::isMainGuiVisible(){
-	return guiMan->getGui()->getVisible();
+	return guiMan->isGuiVisible();
 }
 
 

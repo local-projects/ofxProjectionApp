@@ -7,6 +7,7 @@
 //
 
 #include "MainGUI.h"
+#include "DefaultTheme.h"
 
 MainGUI::MainGUI()
 {
@@ -20,347 +21,237 @@ MainGUI::~MainGUI()
 
 void MainGUI::setup(vector<string> &appStates, string _currentDirectory)
 {
-    
-	currentDirectory = _currentDirectory;
-    
-    // instantiate and position the gui //
-    gui = new ofxDatGui( ofxDatGuiAnchor::TOP_RIGHT );
-    
-    gui->setAssetPath("");
-    gui->setPosition(0.0f, 0.0f);
-    
-    /*
-     Add text component for directory
-     */
-    gui->addTextInput(dirName_input, "Enter directory");
-    gui->onTextInputEvent(this, &MainGUI::onTextInputEvent);
-    
-    /*
-     Add button for saving new mapping directory
-     */
-    gui->addButton(saveMapping_button);
-    gui->onButtonEvent(this, &MainGUI::onButtonEvent);
-    
-    /*
-     Add drop down menu for projection settings
-     */
-    
-    if(!ofDirectory::doesDirectoryExist(projectionDirectory))
-    {
-        //Create directory
-        ofDirectory::createDirectory(projectionDirectory); 
-    }
 
-    ofDirectory dir;
-    dir.listDir(projectionDirectory);
-    int numFiles = dir.size();
-    vector<string> paths;
-    
-    for(int i = 0; i < numFiles; i++)
-    {
- 
-        string path = dir.getPath(i);
+	currentState = appStates[0];
+	currentDirectory = ofFilePath::getBaseName(_currentDirectory);
 
-		ofLogNotice("MainGUI") << "Setting up " << path << " in drop down.";
-
-        paths.push_back(path);
-    }
-    
-    gui->onDropdownEvent(this, &MainGUI::onDropDownEvent);
-    gui->addDropdown(projectionSettings_dropDown, paths);
-    
-    /*
-     Add slider for cropping manager (i.e. cropping interface) scale
-     */
-    gui->addSlider(croppingManSize_slider, 0.0f, 5.0f, 1.5f);
-    gui->getSlider(croppingManSize_slider)->setPrecision(4);
-    
-    gui->addSlider(cropWidth, 0.0f, 1.0f, 1.0f);
-    gui->getSlider(cropWidth)->setPrecision(4);
-    
-    gui->addSlider(cropHeight, 0.0f, 1.0, 1.0f);
-    gui->getSlider(cropHeight)->setPrecision(4);
-    
-    gui->addSlider(cropXpos, 0.0f, 1.0f, 1.0f);
-    gui->getSlider(cropXpos)->setPrecision(4);
-    
-    gui->addSlider(cropYpos, 0.0f, 1.0f, 1.0f);
-    gui->getSlider(cropYpos)->setPrecision(4);
-    
-    gui->addSlider(posOfCropInWarp_X, 0.0f, 1.0f, 0.0f);
-    gui->getSlider(posOfCropInWarp_X)->setPrecision(4);
-
-    
-    gui->addSlider(posOfCropInWarp_Y, 0.0f, 1.0f, 0.0f);
-    gui->getSlider(posOfCropInWarp_Y)->setPrecision(4);
-
-    
-    gui->onSliderEvent(this, &MainGUI::onSliderEvent);
-    
-    
-    /*
-     Add drop down for each state
-     */
     states = appStates;
-    gui->addDropdown(configState, appStates);
-    
-    /*
-     Add ofxNotifcation Observers
-     */
-    ofxNotificationCenter::one().addObserver(this, &MainGUI::onNewCropData, IDManager::one().crop_startInfo_id);
-    
+
+	ofxNotificationCenter::one().addObserver(this, &MainGUI::onNewCropData, IDManager::one().crop_startInfo_id);
+	ofAddListener(ofEvents().keyPressed, this, &MainGUI::onKeyPressed);
+
+	setupImGui();
 }
 
-void MainGUI::update()
-{
-    
+void MainGUI::setupImGui(){
+
+	retinaDpi = ((ofAppGLFWWindow *)ofGetWindowPtr())->getPixelScreenCoordScale();
+	ImGui::CreateContext();
+
+	static const ImWchar glyphRanges[] = {	0x0020, 0x2600, 0, }; // less
+	auto io = &ImGui::GetIO();
+
+	ImFontConfig font_config;
+	font_config.OversampleH = 1;
+	font_config.OversampleV = 1;
+	font_config.GlyphExtraSpacing.x = 0;
+	font_config.PixelSnapH = true; //avoid fuzzy mess fonts
+	font_config.RasterizerMultiply = 1.0;
+
+	int baseFontSize = 15 * retinaDpi;
+	string path = ofToDataPath("fonts/VeraMono-Bold.ttf", true);
+	auto unicodeFont = io->Fonts->AddFontFromFileTTF(&path[0], baseFontSize, &font_config, &glyphRanges[0]);
+	ImGui::GetIO().FontDefault = io->Fonts->Fonts[0];
+
+	imgui = new ofxImGui::Gui();
+	ofxImGui::DefaultTheme* defaultTheme = new ofxImGui::DefaultTheme();
+	imgui->setup(defaultTheme, true);
+
+	ImGuiStyle* style = &ImGui::GetStyle();
+	ImGuiStyle darkStyle;
+	ImGui::StyleColorsDark(&darkStyle);
+	*style = darkStyle;
+	style->FrameRounding = 5;
+
+	ImGui::GetIO().MouseDrawCursor = false;
 }
 
-void MainGUI::draw()
-{
-    
+void MainGUI::onKeyPressed(ofKeyEventArgs &args){
+}
+
+
+void MainGUI::update(){
+}
+
+void MainGUI::draw(){
+
+	if(imgui) imgui->begin();
+
+	if(showImgui){
+
+		ImGui::SetNextWindowSize(ImVec2(600 * retinaDpi, 260 * retinaDpi), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Mapping", &showImgui); /////////////////////////////////////////////
+
+		ImGui::PushItemWidth(-200 * retinaDpi);
+
+		if (ImGui::BeginCombo("Load Mapping", currentState.c_str(), ImGuiComboFlags_NoPreview)){
+			for (int n = 0; n < savedConfigs.size(); n++){
+				bool is_selected = (currentConfig == savedConfigs[n]);
+				if (ImGui::Selectable(savedConfigs[n].c_str(), is_selected)){ //user selecetd one
+					currentConfig = savedConfigs[n];
+					ofxNotificationCenter::Notification mnd;
+					mnd.ID = IDManager::one().loadProjSetting_id;
+					mnd.data["directory"] = currentConfig;
+					ofxNotificationCenter::one().postNotification(IDManager::one().loadProjSetting_id, mnd);
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		static char configName[128];
+		strcpy(configName, currentDirectory.c_str());
+		ImGui::InputTextWithHint("Mapping Name", "Enter Mapping Name", configName, IM_ARRAYSIZE(configName));
+		currentDirectory = configName;
+
+		if(ImGui::Button("Save Mapping")){
+			//Add to the drop down menu
+			string path = ofFilePath::join(projectionDirectory, currentDirectory);
+			ofxNotificationCenter::Notification mnd;
+			mnd.ID = IDManager::one().saveProjSetting_id;
+			mnd.data["directory"] = path;
+			auto it = std::find(savedConfigs.begin(), savedConfigs.end(), path);
+			if(it == savedConfigs.end()){
+				savedConfigs.push_back(path);
+			}
+			ofxNotificationCenter::one().postNotification(IDManager::one().saveProjSetting_id, mnd);
+		}
+		ImGui::SliderFloat("Crop Interface Size", &cropInterfaceSize, 0.0f, 5.0f, "%.6f");
+		if(ImGui::IsItemEdited()){
+			ofxNotificationCenter::Notification mnd;
+			mnd.ID = IDManager::one().croppingInterfaceScale_id;
+			mnd.data["percent"] = cropInterfaceSize;
+			ofxNotificationCenter::one().postNotification(IDManager ::one().croppingInterfaceScale_id, mnd);
+		}
+
+		ImGui::SliderFloat("Crop Width", &cropWidth_, 0.0f, 1.0f, "%.6f");
+		if(ImGui::IsItemEdited()){
+			ofxNotificationCenter::Notification mnd;
+			mnd.ID = IDManager::one().cropWidth_id;
+			mnd.data["width"] = cropWidth_;
+			ofxNotificationCenter::one().postNotification(IDManager::one().cropWidth_id, mnd);
+		}
+
+		ImGui::SliderFloat("Crop Height", &cropHeight_, 0.0f, 1.0f, "%.6f");
+		if(ImGui::IsItemEdited()){
+			ofxNotificationCenter::Notification mnd;
+			mnd.ID = IDManager::one().cropWidth_id;
+			mnd.data["height"] = cropHeight_;
+			ofxNotificationCenter::one().postNotification(IDManager::one().cropHeight_id, mnd);
+		}
+
+		ImGui::SliderFloat("Crop XPos", &cropX, 0.0f, 1.0f, "%.6f");
+		if(ImGui::IsItemEdited()){
+			ofxNotificationCenter::Notification mnd;
+			mnd.ID = IDManager::one().cropXpos_id;
+			mnd.data["cropXpos"] = cropX;
+			ofLogNotice("MainGUI::onSliderEvent") << "Updated crop cropXpos scale to: " << cropX;
+			ofxNotificationCenter::one().postNotification(IDManager::one().cropXpos_id, mnd);
+		}
+
+		ImGui::SliderFloat("Crop YPos", &cropY, 0.0f, 1.0f, "%.6f");
+		if(ImGui::IsItemEdited()){
+			ofxNotificationCenter::Notification mnd;
+			mnd.ID = IDManager::one().cropYpos_id;
+			mnd.data["cropYpos"] = cropY;
+			ofLogNotice("MainGUI::onSliderEvent") << "Updated crop cropYpos scale to: " << cropY;
+			ofxNotificationCenter::one().postNotification(IDManager::one().cropYpos_id, mnd);
+		}
+
+		ImGui::SliderFloat("X Pos of Crop in Warp", &cropPosInWarp_X, 0.0f, 1.0f, "%.6f");
+		if(ImGui::IsItemEdited()){
+			ofxNotificationCenter::Notification mnd;
+			mnd.ID = IDManager::one().posOfCropInWarp_X_id;
+			mnd.data["xPos"] = cropPosInWarp_X;
+			ofxNotificationCenter::one().postNotification(IDManager::one().posOfCropInWarp_X_id, mnd);
+		}
+
+		ImGui::SliderFloat("Y Pos of Crop in Warp", &cropPosInWarp_Y, 0.0f, 1.0f, "%.6f");
+		if(ImGui::IsItemEdited()){
+			ofxNotificationCenter::Notification mnd;
+			mnd.ID = IDManager::one().posOfCropInWarp_Y_id;
+			mnd.data["yPos"] = cropPosInWarp_Y;
+			ofxNotificationCenter::one().postNotification(IDManager::one().posOfCropInWarp_Y_id, mnd);
+		}
+
+
+		if (ImGui::BeginCombo("Config State", currentState.c_str())){
+			for (int n = 0; n < states.size(); n++){
+				bool is_selected = (currentState == states[n]);
+				if (ImGui::Selectable(states[n].c_str(), is_selected)){ //user selecetd one
+					currentState = states[n];
+					ofxNotificationCenter::Notification mnd;
+					mnd.ID = IDManager::one().appState_id;
+					mnd.data["appState"] = n;
+					ofxNotificationCenter::one().postNotification(IDManager::one().appState_id, mnd);
+				}
+				if (is_selected){
+					ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		for (int i = 0; i < warpVisible.size(); i++){
+			ImGui::PushID(i);
+			string num = ofToString(i);
+
+			bool val = warpVisible[i];
+			ImGui::Checkbox(num.c_str(), &val);
+			warpVisible[i] = val;
+
+			ImGui::SameLine();
+			ImGui::Dummy(ImVec2(5 * retinaDpi, 5));
+				ImGui::SameLine();
+			ImGui::PopID();
+		}
+		ImGui::Dummy(ImVec2(20 * retinaDpi, 5));
+		ImGui::SameLine();
+
+		ImGui::Text("Warp Display State");
+
+		ImGui::PopItemWidth();
+		ImGui::End();
+	}
+
+	ImGui::ShowDemoWindow();
+
+	if(imgui) imgui->end();
+
+	//if(imgui) gui->draw(); //actually render
+}
+
+void MainGUI::updateNumWarps(int n){
+
+	if(n < 0) n = 0;
+	if(warpVisible.size() == n) return;
+
+	if(warpVisible.size() < n){ //we add bools
+		while(warpVisible.size() != n){
+			warpVisible.push_back(true);
+		}
+	}else{ //we remove bools
+		while(warpVisible.size() != n){
+			warpVisible.erase(warpVisible.begin() + warpVisible.size() - 1);
+		}
+	}
+}
+
+bool MainGUI::getCaptureMouse(){
+	return ImGui::GetIO().WantCaptureMouse;
 }
 
 #pragma mark GUI OBJECT
 
-ofxDatGui * MainGUI::getGui()
-{
-    return gui;
-}
-
 void MainGUI::toggleGuiVisiblity()
 {
-    if(gui->getVisible())
-    {
-        gui->setVisible(false);
-    }
-    else
-    {
-        gui->setVisible(true);
-    }
+	showImgui ^= true;
 }
 
 
 #pragma mark CROPPING INTERFACE
 float MainGUI::getCropSize()
 {
-    return gui->getSlider(croppingManSize_slider)->getValue();
-}
-
-#pragma mark CALLBACKS
-
-void MainGUI::onTextInputEvent(ofxDatGuiTextInputEvent e)
-{
-    ofLogNotice("MainGUI::onTextInputEvent") << "onTextInputEvent: " << e.target->getLabel() << " " << e.target->getText();
-    
-    string directory = e.target->getText();
-    
-    /*
-     Clean up text.
-     */
-    
-    if(ofIsStringInString(e.target->getText(), " "))
-    {
-        string input = e.target->getText();
-        vector<string> stringParts;
-        stringParts = ofSplitString(input, " ");
-        directory = "";
-        
-        for(auto part : stringParts)
-        {
-            directory += part;
-        }
-        
-        ofLogNotice("MainGUI::onTextInputEvent") << "Reformated \" " << input << "\" to " << directory;
-    }
-    
-    currentDirectory = directory;
-    
-}
-
-void MainGUI::onButtonEvent(ofxDatGuiButtonEvent e)
-{
-    ofLogNotice("MainGUI::onButtonEvent") << "Button " << e.target->getLabel() << " pressed";
-    
-    //Add to the drop down menu
-    string path = ofFilePath::join(projectionDirectory, currentDirectory);
-    
-    bool dropDownExist = false;
-    for(int i = 0; i < gui->getDropdown(projectionSettings_dropDown)->size(); i++)
-    {
-        string label = gui->getDropdown(projectionSettings_dropDown)->getChildAt(i)->getLabel();
-        if(ofToUpper(path) == ofToUpper(label))
-        {
-            dropDownExist = true;
-        }
-    }
-    
-    if(!dropDownExist)
-    {
-        gui->getDropdown(projectionSettings_dropDown)->addToDropDown(path);
-    }
-    
-    //Send event via notification center
-    ofxNotificationCenter::Notification mnd;
-    mnd.ID = IDManager::one().saveProjSetting_id;
-    mnd.data["directory"] = path;
-    
-    ofxNotificationCenter::one().postNotification(IDManager::one().saveProjSetting_id, mnd);
-    
-}
-
-void MainGUI::onDropDownEvent(ofxDatGuiDropdownEvent e)
-{
-    //ofLogNotice("MainGUI::onDropDownEvent") << gui->getChild(e.parent);
-    
-    
-    if(e.child < gui->getDropdown(projectionSettings_dropDown)->size())
-    {
-        if(e.target->getLabel() == gui->getDropdown(projectionSettings_dropDown)->getChildAt(e.child)->getLabel())
-        {
-            string file = gui->getDropdown(projectionSettings_dropDown)->getChildAt(e.child)->getLabel();
-            ofLogNotice("MainGUI::onDropDownEvent") << "Drop down " << file << " selected.";
-            
-            //Send event via notification center
-            ofxNotificationCenter::Notification mnd;
-            mnd.ID = IDManager::one().loadProjSetting_id;
-            mnd.data["directory"] = file;
-            ofxNotificationCenter::one().postNotification(IDManager::one().loadProjSetting_id, mnd);
-            
-            return;
-        }
-        
-    }
-    
-    
-    if(e.child < gui->getDropdown(configState)->size())
-    {
-        if(e.target->getLabel() == gui->getDropdown(configState)->getChildAt(e.child)->getLabel())
-        {
-            string state = gui->getDropdown(configState)->getChildAt(e.child)->getLabel();
-            
-            for(int i = 0; i < states.size(); i++)
-            {
-                if(states[i] == state)
-                {
-                    //Send event via notification center
-                    ofxNotificationCenter::Notification mnd;
-                    mnd.ID = IDManager::one().appState_id;
-                    mnd.data["appState"] = i;
-                    ofxNotificationCenter::one().postNotification(IDManager::one().appState_id, mnd);
-                }
-            }
-            
-            ofLogNotice("MainGUI::onDropDownEvent") << "Config state changed to: " << state;
-            return;
-        }
-        
-    }
-    
-}
-
-void MainGUI::onSliderEvent(ofxDatGuiSliderEvent e)
-{
-    ofLogNotice("MainGUI::onSliderEvent") << "New event from " << e.target->getLabel();
-    
-    if(e.target->getLabel() == ofToUpper(croppingManSize_slider))
-    {
-        //Send event via notification center
-        ofxNotificationCenter::Notification mnd;
-        mnd.ID = IDManager::one().croppingInterfaceScale_id;
-        mnd.data["percent"] = e.value;
-        
-        ofxNotificationCenter::one().postNotification(IDManager ::one().croppingInterfaceScale_id, mnd);
-        
-        ofLogNotice("MainGUI::onSliderEvent") << "Updated cropping interface scale to " << e.value;
-    }
-    else if(e.target->getLabel() == ofToUpper(cropWidth))
-    {
-        //Send event via notification center
-        ofxNotificationCenter::Notification mnd;
-        mnd.ID = IDManager::one().cropWidth_id;
-        mnd.data["width"] = e.value;
-        
-        ofLogNotice("MainGUI::onSliderEvent") << "Updated crop width scale to: " << e.value;
-        
-        ofxNotificationCenter::one().postNotification(IDManager::one().cropWidth_id, mnd);
-        
-    }
-    else if(e.target->getLabel() == ofToUpper(cropHeight))
-    {
-        //Send event via notification center
-        ofxNotificationCenter::Notification mnd;
-        mnd.ID = IDManager::one().cropHeight_id;
-        mnd.data["height"] = e.value;
-        
-        ofLogNotice("MainGUI::onSliderEvent") << "Updated crop height scale to: " << e.value;
-        
-        ofxNotificationCenter::one().postNotification(IDManager::one().cropHeight_id, mnd);
-        
-    }
-    else if(e.target->getLabel() == ofToUpper(cropXpos))
-    {
-        //Send event via notification center
-        ofxNotificationCenter::Notification mnd;
-        mnd.ID = IDManager::one().cropXpos_id;
-        mnd.data["cropXpos"] = e.value;
-        
-        ofLogNotice("MainGUI::onSliderEvent") << "Updated crop cropXpos scale to: " << e.value;
-        
-        ofxNotificationCenter::one().postNotification(IDManager::one().cropXpos_id, mnd);
-        
-    }
-    else if(e.target->getLabel() == ofToUpper(cropYpos))
-    {
-        //Send event via notification center
-        ofxNotificationCenter::Notification mnd;
-        mnd.ID = IDManager::one().cropYpos_id;
-        mnd.data["cropYpos"] = e.value;
-        ofxNotificationCenter::one().postNotification(IDManager::one().cropYpos_id, mnd);
-        
-		/*
-        float newHeight = ( 1 - e.value );
-        if((e.value > 0) && ( gui->getSlider(cropHeight)->getValue() > newHeight) || !gui->getSlider(cropHeight)->getValue())
-        {
-            
-            gui->getSlider(cropHeight)->setValue(newHeight);
-            
-            //Send event via notification center
-            ofxNotificationCenter::Notification mnd1;
-            mnd1.ID = IDManager::one().cropHeight_id;
-            mnd1.data["height"] = newHeight;
-            ofxNotificationCenter::one().postNotification(IDManager::one().cropHeight_id, mnd1);
-        }
-		*/
-        ofLogNotice("MainGUI::onSliderEvent") << "Updated crop cropYpos scale to: " << e.value;
-        
-    }
-    else if(e.target->getLabel() == ofToUpper(posOfCropInWarp_X))
-    {
-        //Send event via notification center
-        ofxNotificationCenter::Notification mnd;
-        mnd.ID = IDManager::one().posOfCropInWarp_X_id;
-        mnd.data["xPos"] = e.value;
-        
-        ofLogNotice("MainGUI::onSliderEvent") << "Updated x_position of crop: " << e.value;
-        
-        ofxNotificationCenter::one().postNotification(IDManager::one().posOfCropInWarp_X_id, mnd);
-        
-    }
-    else if(e.target->getLabel() == ofToUpper(posOfCropInWarp_Y))
-    {
-        //Send event via notification center
-        ofxNotificationCenter::Notification mnd;
-        mnd.ID = IDManager::one().posOfCropInWarp_Y_id;
-        mnd.data["yPos"] = e.value;
-        
-        ofLogNotice("MainGUI::onSliderEvent") << "Updated y_position of crop: " << e.value;
-        
-        ofxNotificationCenter::one().postNotification(IDManager::one().posOfCropInWarp_Y_id, mnd);
-    }
-
-    
-    
+    return cropInterfaceSize;
 }
 
 #pragma mark OFXNOTIFCATION CALLBACKS
@@ -373,10 +264,10 @@ void MainGUI::onNewCropData(ofxNotificationCenter::Notification& n)
     float xPos = n.data["xPos"];
     float yPos = n.data["yPos"];
     
-    gui->getSlider(cropWidth)->setValue(width);
-    gui->getSlider(cropHeight)->setValue(height);
-    gui->getSlider(cropXpos)->setValue(xPos);
-    gui->getSlider(cropYpos)->setValue(yPos);
+	cropX = xPos;
+	cropY = yPos;
+	cropWidth_ = width;
+	cropHeight_ = height;
 }
 
 #pragma mark DIRECTORY 

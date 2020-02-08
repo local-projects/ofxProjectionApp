@@ -95,6 +95,7 @@ protected:
         BOTTOM_LEFT,
         BOTTOM_RIGHT
     };
+	int numWarps = 0;
     
     //Each warp will have a vector of edges
     vector<EdgeBlend*> edgeGuis;
