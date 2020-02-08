@@ -48,7 +48,7 @@ void MainGUI::setupImGui(){
 	font_config.PixelSnapH = true; //avoid fuzzy mess fonts
 	font_config.RasterizerMultiply = 1.0;
 
-	int baseFontSize = 15 * retinaDpi;
+	int baseFontSize = 20 * retinaDpi;
 	string path = ofToDataPath("fonts/VeraMono-Bold.ttf", true);
 	auto unicodeFont = io->Fonts->AddFontFromFileTTF(&path[0], baseFontSize, &font_config, &glyphRanges[0]);
 	ImGui::GetIO().FontDefault = io->Fonts->Fonts[0];
@@ -82,7 +82,7 @@ void MainGUI::draw(){
 		ImGui::SetNextWindowSize(ImVec2(600 * retinaDpi, 260 * retinaDpi), ImGuiCond_FirstUseEver);
 		ImGui::Begin("Mapping", &showImgui); /////////////////////////////////////////////
 
-		ImGui::PushItemWidth(-200 * retinaDpi);
+		ImGui::PushItemWidth(-230 * retinaDpi);
 
 		if (ImGui::BeginCombo("Load Mapping", currentState.c_str(), ImGuiComboFlags_NoPreview)){
 			for (int n = 0; n < savedConfigs.size(); n++){

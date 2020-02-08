@@ -32,7 +32,7 @@ public:
      */
     void toggleGuiVisiblity();
 	bool isGuiVisible(){return showImgui;}
-	bool setGuiVisible(bool v){showImgui = v;}
+	void setGuiVisible(bool v){showImgui = v;}
 
 	void updateNumWarps(int n);
 	vector<bool> getWarpVisibility(){return warpVisible;};
