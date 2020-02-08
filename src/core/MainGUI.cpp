@@ -25,7 +25,16 @@ void MainGUI::setup(vector<string> &appStates, string _currentDirectory)
 	currentState = appStates[0];
 	currentDirectory = ofFilePath::getBaseName(_currentDirectory);
 
-    states = appStates;
+	ofDirectory dir;
+	dir.listDir(projectionDirectory);
+	int numFiles = dir.size();
+	for(int i = 0; i < numFiles; i++){
+		string path = dir.getPath(i);
+		ofLogNotice("MainGUI") << "Setting up " << path << " in drop down.";
+		savedConfigs.push_back(path);
+	}
+
+	states = appStates;
 
 	ofxNotificationCenter::one().addObserver(this, &MainGUI::onNewCropData, IDManager::one().crop_startInfo_id);
 	ofAddListener(ofEvents().keyPressed, this, &MainGUI::onKeyPressed);
@@ -123,7 +132,10 @@ void MainGUI::draw(){
 			ofxNotificationCenter::one().postNotification(IDManager ::one().croppingInterfaceScale_id, mnd);
 		}
 
-		ImGui::SliderFloat("Crop Width", &cropWidth_, 0.0f, 1.0f, "%.6f");
+		static float inc = 0.0001;
+		ImGui::SliderFloat("Slider Increment", &inc, 0.00000001f, 0.0003, "%.6f");
+
+		ImGui::DragFloat("Crop Width", &cropWidth_, inc,  0.0f, 1.0f, "%.6f");
 		if(ImGui::IsItemEdited()){
 			ofxNotificationCenter::Notification mnd;
 			mnd.ID = IDManager::one().cropWidth_id;
@@ -131,7 +143,7 @@ void MainGUI::draw(){
 			ofxNotificationCenter::one().postNotification(IDManager::one().cropWidth_id, mnd);
 		}
 
-		ImGui::SliderFloat("Crop Height", &cropHeight_, 0.0f, 1.0f, "%.6f");
+		ImGui::DragFloat("Crop Height", &cropHeight_, inc, 0.0f, 1.0f, "%.6f");
 		if(ImGui::IsItemEdited()){
 			ofxNotificationCenter::Notification mnd;
 			mnd.ID = IDManager::one().cropWidth_id;
@@ -139,7 +151,7 @@ void MainGUI::draw(){
 			ofxNotificationCenter::one().postNotification(IDManager::one().cropHeight_id, mnd);
 		}
 
-		ImGui::SliderFloat("Crop XPos", &cropX, 0.0f, 1.0f, "%.6f");
+		ImGui::DragFloat("Crop XPos", &cropX, inc, 0.0f, 1.0f, "%.6f");
 		if(ImGui::IsItemEdited()){
 			ofxNotificationCenter::Notification mnd;
 			mnd.ID = IDManager::one().cropXpos_id;
@@ -148,7 +160,7 @@ void MainGUI::draw(){
 			ofxNotificationCenter::one().postNotification(IDManager::one().cropXpos_id, mnd);
 		}
 
-		ImGui::SliderFloat("Crop YPos", &cropY, 0.0f, 1.0f, "%.6f");
+		ImGui::DragFloat("Crop YPos", &cropY, inc, 0.0f, 1.0f, "%.6f");
 		if(ImGui::IsItemEdited()){
 			ofxNotificationCenter::Notification mnd;
 			mnd.ID = IDManager::one().cropYpos_id;
@@ -157,7 +169,7 @@ void MainGUI::draw(){
 			ofxNotificationCenter::one().postNotification(IDManager::one().cropYpos_id, mnd);
 		}
 
-		ImGui::SliderFloat("X Pos of Crop in Warp", &cropPosInWarp_X, 0.0f, 1.0f, "%.6f");
+		ImGui::DragFloat("X Pos of Crop in Warp", &cropPosInWarp_X, inc, 0.0f, 1.0f, "%.6f");
 		if(ImGui::IsItemEdited()){
 			ofxNotificationCenter::Notification mnd;
 			mnd.ID = IDManager::one().posOfCropInWarp_X_id;
@@ -165,7 +177,7 @@ void MainGUI::draw(){
 			ofxNotificationCenter::one().postNotification(IDManager::one().posOfCropInWarp_X_id, mnd);
 		}
 
-		ImGui::SliderFloat("Y Pos of Crop in Warp", &cropPosInWarp_Y, 0.0f, 1.0f, "%.6f");
+		ImGui::DragFloat("Y Pos of Crop in Warp", &cropPosInWarp_Y, inc, 0.0f, 1.0f, "%.6f");
 		if(ImGui::IsItemEdited()){
 			ofxNotificationCenter::Notification mnd;
 			mnd.ID = IDManager::one().posOfCropInWarp_Y_id;
@@ -213,7 +225,7 @@ void MainGUI::draw(){
 		ImGui::End();
 	}
 
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
 
 	if(imgui) imgui->end();
 
