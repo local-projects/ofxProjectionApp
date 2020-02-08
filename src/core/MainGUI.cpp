@@ -93,6 +93,27 @@ void MainGUI::draw(){
 
 		ImGui::PushItemWidth(-230 * retinaDpi);
 
+		if (ImGui::BeginCombo("Config State", currentState.c_str())){
+			for (int n = 0; n < states.size(); n++){
+				bool is_selected = (currentState == states[n]);
+				if (ImGui::Selectable(states[n].c_str(), is_selected)){ //user selecetd one
+					currentState = states[n];
+					ofxNotificationCenter::Notification mnd;
+					mnd.ID = IDManager::one().appState_id;
+					mnd.data["appState"] = n;
+					ofxNotificationCenter::one().postNotification(IDManager::one().appState_id, mnd);
+				}
+				if (is_selected){
+					ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::Dummy(ImVec2(2,2 * retinaDpi));
+		ImGui::Separator();
+		ImGui::Dummy(ImVec2(2,2 * retinaDpi));
+
 		if (ImGui::BeginCombo("Load Mapping", currentState.c_str(), ImGuiComboFlags_NoPreview)){
 			for (int n = 0; n < savedConfigs.size(); n++){
 				bool is_selected = (currentConfig == savedConfigs[n]);
@@ -131,6 +152,10 @@ void MainGUI::draw(){
 			mnd.data["percent"] = cropInterfaceSize;
 			ofxNotificationCenter::one().postNotification(IDManager ::one().croppingInterfaceScale_id, mnd);
 		}
+
+		ImGui::Dummy(ImVec2(2,2 * retinaDpi));
+		ImGui::Separator();
+		ImGui::Dummy(ImVec2(2,2 * retinaDpi));
 
 		static float inc = 0.0001;
 		ImGui::SliderFloat("Slider Increment", &inc, 0.00000001f, 0.0003, "%.6f");
@@ -185,23 +210,9 @@ void MainGUI::draw(){
 			ofxNotificationCenter::one().postNotification(IDManager::one().posOfCropInWarp_Y_id, mnd);
 		}
 
-
-		if (ImGui::BeginCombo("Config State", currentState.c_str())){
-			for (int n = 0; n < states.size(); n++){
-				bool is_selected = (currentState == states[n]);
-				if (ImGui::Selectable(states[n].c_str(), is_selected)){ //user selecetd one
-					currentState = states[n];
-					ofxNotificationCenter::Notification mnd;
-					mnd.ID = IDManager::one().appState_id;
-					mnd.data["appState"] = n;
-					ofxNotificationCenter::one().postNotification(IDManager::one().appState_id, mnd);
-				}
-				if (is_selected){
-					ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
-				}
-			}
-			ImGui::EndCombo();
-		}
+		ImGui::Dummy(ImVec2(2,2 * retinaDpi));
+		ImGui::Separator();
+		ImGui::Dummy(ImVec2(2,2 * retinaDpi));
 
 		for (int i = 0; i < warpVisible.size(); i++){
 			ImGui::PushID(i);
