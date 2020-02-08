@@ -42,17 +42,7 @@ public:
     void update();
     void draw();
 
-    
-    /*
-     State management of all the different GUIS
-     */
-    enum GUIStates
-    {
-        EDGE_BLEND_GUI_OPEN,
-        EDGE_BLEND_GUIS_CLOSED,
-        NUM_GUI_STATES
-    };
-    
+
     /*
      Saving
      */
@@ -111,11 +101,6 @@ protected:
     ofFbo *canvasRef;
     ofVec2f canvasSize = ofVec2f(0.0f, 0.0f);
     
-    /*
-     State management of all the different GUIS
-     */
-    GUIStates guiState = GUIStates::EDGE_BLEND_GUIS_CLOSED;
-    void setGuiState(GUIStates _guiState);
     
     /*
      Notification Center

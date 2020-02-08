@@ -12,7 +12,6 @@
 
 #pragma once
 #include "ofMain.h"
-#include "ofxDatGui.h"
 #include "ofxNotificationCenter.h"
 #include "IDManager.h"
 
@@ -23,14 +22,15 @@ public:
     ~EdgeBlend();
     
     void setup(int _index);
-    void update(float dt);
-    void draw();
-    
+
+	void runGui(float retina);
+
     
     /*
      Gui Object
      */
-    ofxDatGui* getGuiObject();
+	void setVisible(bool v);
+	void setPosition(float x, float y);
     
     /*
      Get edge blending values
@@ -56,35 +56,18 @@ private:
     /*
      Gui object
      */
-    ofxDatGui *gui;
+
+	bool visibleGui = false;
+	ofVec2f winPos;
     
     /*
      Attributes
      */
     int index = 0;
     
-    
-    //Labels
-    string gammaR_lab = "GAMMAR";
-    string gammaB_lab = "GAMMAB";
-    string gammaG_lab = "GAMMAG";
-    
-    string edgeX_lab = "LEFT_EDGE";
-    string edgeY_lab = "TOP_EDGE";
-    string edgeZ_lab = "RIGHT_EDGE";
-    string edgeW_lab = "BTM_EDGE";
-    
-    string exponent_lab = "EXPONENT";
-    
-    string close_lab = "CLOSE";
-    /*
-     Toggle for button
-     */
-    bool active = false;
-    
-    
-    /*
-     Callbacks
-     */
-    void onButtonEvent(ofxDatGuiButtonEvent e);
+
+	float gamma = 1;
+	glm::vec4 edge;
+	float exponent = 1.0;
+
 };

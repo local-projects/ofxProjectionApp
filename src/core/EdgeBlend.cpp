@@ -7,6 +7,7 @@
 //
 
 #include "EdgeBlend.h"
+#include "ofxImGui.h"
 
 EdgeBlend::EdgeBlend()
 {
@@ -23,131 +24,76 @@ void EdgeBlend::setup(int _index)
     
     //The index serves of the UID
     index = _index;
-    
-    // instantiate and position the gui //
-    gui = new ofxDatGui( ofxDatGuiAnchor::TOP_RIGHT );
-    gui->setAssetPath("");
-    gui->setVisible(false);
-    
-    //Add gamma sliders
-    gui->addSlider(gammaR_lab, 0.0f, 100.0f, 50.0f);
-	gui->getSlider(gammaR_lab)->setPrecision(4);
-
-    gui->addSlider(gammaB_lab, 0.0f, 100.0f, 50.0f);
-	gui->getSlider(gammaB_lab)->setPrecision(4);
-
-    gui->addSlider(gammaG_lab, 0.0f, 100.0f, 50.0f);
-	gui->getSlider(gammaG_lab)->setPrecision(4);
-    
-    //Add edge sliders
-    gui->addSlider(edgeX_lab, 0.0f, 1.0f, 1.0f);
-	gui->getSlider(edgeX_lab)->setPrecision(4);
-
-    gui->addSlider(edgeY_lab, 0.0f, 1.0f, 1.0f);
-	gui->getSlider(edgeY_lab)->setPrecision(4);
-
-    gui->addSlider(edgeZ_lab, 0.0f, 1.0f, 1.0f);
-	gui->getSlider(edgeZ_lab)->setPrecision(4);
-
-    gui->addSlider(edgeW_lab, 0.0f, 1.0f, 1.0f);
-	gui->getSlider(edgeW_lab)->setPrecision(4);
-
-    
-    //Add exponenet slider
-    gui->addSlider(exponent_lab, 0.0f, 5.0f, 1.0f);
-    
-    //Add close button
-    gui->addButton(close_lab);
-    gui->onButtonEvent(this, &EdgeBlend::onButtonEvent);
-    
-    //Add listeners
-    
-    
 }
 
-void EdgeBlend::update(float dt)
-{
-    
+
+void EdgeBlend::setVisible(bool v){
+	visibleGui = v;
 }
 
-void EdgeBlend::draw()
-{
-    
-    
+
+void EdgeBlend::setPosition(float x, float y){
+	winPos.x = x;
+	winPos.y = y;
 }
+
+
+void EdgeBlend::runGui(float retina){
+	//imgui
+	if(visibleGui){
+
+		ImGui::SetNextWindowPos(ImVec2(winPos.x * retina, winPos.y * retina), ImGuiCond_FirstUseEver);
+		string winName = "EdgeBlend " + ofToString(index);
+		ImGui::Begin(winName.c_str(), &visibleGui, ImGuiWindowFlags_AlwaysAutoResize); /////////////////////////////////////////////
+
+		//ImGui::PushItemWidth(-200 * retina);
+
+		static float inc = 0.0001;
+		ImGui::DragFloat("Gamma", &gamma, 0.05f,  0.01f, 10.0f, "%.7f");
+		ImGui::DragFloat("Exponent", &exponent, 0.025f,  0.6f, 3.5f, "%.7f");
+		ImGui::Separator();
+		ImGui::SliderFloat("Slider Increment", &inc, 0.00000001f, 0.0003, "%.6f");
+		ImGui::Separator();
+		ImGui::DragFloat("Left Edge", &edge.x, inc,  0.0f, 1.0f, "%.7f");
+		ImGui::DragFloat("Right Edge", &edge.z, inc,  0.0f, 1.0f, "%.7f");
+		ImGui::DragFloat("Top Edge", &edge.y, inc,  0.0f, 1.0f, "%.7f");
+		ImGui::DragFloat("Bottom Edge", &edge.w, inc,  0.0f, 1.0f, "%.7f");
+
+		ImGui::End();
+	}
+}
+
 
 #pragma mark GET EDGE BLENDING VALUES
 
-glm::vec4 EdgeBlend::getEdges()
-{
-    glm::vec4 temp;
-    temp = glm::vec4(gui->getSlider(edgeX_lab)->getValue(),
-                     gui->getSlider(edgeY_lab)->getValue(),
-                     gui->getSlider(edgeZ_lab)->getValue(),
-                     gui->getSlider(edgeW_lab)->getValue());
-    return temp;
+glm::vec4 EdgeBlend::getEdges(){
+	return edge;
 }
 
-glm::vec3 EdgeBlend::getGamma()
-{
-    glm::vec3 temp;
-    temp = glm::vec3(gui->getSlider(gammaR_lab)->getValue(),
-                     gui->getSlider(gammaG_lab)->getValue(),
-                     gui->getSlider(gammaB_lab)->getValue());
-    return temp;
+glm::vec3 EdgeBlend::getGamma(){
+    return glm::vec3(gamma, gamma, gamma);
 }
 
-float EdgeBlend::getExponent()
-{
-    return gui->getSlider(exponent_lab)->getValue();
+float EdgeBlend::getExponent(){
+	return exponent;
 }
 
 #pragma mark SET EDGE BLENDING VALUES
 
 void EdgeBlend::setEdges(glm::vec4 edges)
 {
-    gui->getSlider(edgeX_lab)->setValue(edges.x);
-    gui->getSlider(edgeY_lab)->setValue(edges.y);
-    gui->getSlider(edgeZ_lab)->setValue(edges.z);
-    gui->getSlider(edgeW_lab)->setValue(edges.x);
-    
+	edge = edges;
 }
 
-void EdgeBlend::setGamma(glm::vec3 gamma)
-{
-    gui->getSlider(gammaR_lab)->setValue(gamma.x);
-    gui->getSlider(gammaB_lab)->setValue(gamma.y);
-    gui->getSlider(gammaG_lab)->setValue(gamma.z);
-    
+void EdgeBlend::setGamma(glm::vec3 gamma_){
+	gamma = gamma_.x;
 }
 
-void EdgeBlend::setExponent(float _exponent)
-{
-    gui->getSlider(exponent_lab)->setValue(_exponent);
+void EdgeBlend::setExponent(float _exponent){
+	exponent = _exponent;
 }
 
 #pragma mark ATTRIBUTES
-int EdgeBlend::getIndex()
-{
+int EdgeBlend::getIndex(){
     return index;
 }
-
-#pragma mark GUI
-ofxDatGui * EdgeBlend::getGuiObject()
-{
-    return gui;
-}
-
-#pragma mark EVENTS
-
-
-void EdgeBlend::onButtonEvent(ofxDatGuiButtonEvent e)
-{
-    //Send event via notification center
-    ofxNotificationCenter::Notification mnd;
-    mnd.ID = IDManager::one().edgeBlendGui_id;
-    mnd.data["index"] = index;
-    
-    ofxNotificationCenter::one().postNotification(IDManager::one().edgeBlendGui_id, mnd);
-}
-

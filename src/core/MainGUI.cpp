@@ -64,7 +64,7 @@ void MainGUI::setupImGui(){
 
 	imgui = new ofxImGui::Gui();
 	ofxImGui::DefaultTheme* defaultTheme = new ofxImGui::DefaultTheme();
-	imgui->setup(defaultTheme, true);
+	imgui->setup(defaultTheme, false);
 
 	ImGuiStyle* style = &ImGui::GetStyle();
 	ImGuiStyle darkStyle;
@@ -79,17 +79,12 @@ void MainGUI::onKeyPressed(ofKeyEventArgs &args){
 }
 
 
-void MainGUI::update(){
-}
-
-void MainGUI::draw(){
-
-	if(imgui) imgui->begin();
+void MainGUI::runGui(){
 
 	if(showImgui){
 
 		ImGui::SetNextWindowSize(ImVec2(600 * retinaDpi, 260 * retinaDpi), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Mapping", &showImgui); /////////////////////////////////////////////
+		ImGui::Begin("Mapping", &showImgui, ImGuiWindowFlags_AlwaysAutoResize); /////////////////////////////////////////////
 
 		ImGui::PushItemWidth(-230 * retinaDpi);
 
@@ -145,7 +140,7 @@ void MainGUI::draw(){
 			}
 			ofxNotificationCenter::one().postNotification(IDManager::one().saveProjSetting_id, mnd);
 		}
-		ImGui::SliderFloat("Crop Interface Size", &cropInterfaceSize, 0.0f, 5.0f, "%.6f");
+		ImGui::SliderFloat("Crop Interface Size", &cropInterfaceSize, 0.0f, 2.0f, "%.6f");
 		if(ImGui::IsItemEdited()){
 			ofxNotificationCenter::Notification mnd;
 			mnd.ID = IDManager::one().croppingInterfaceScale_id;
@@ -237,11 +232,20 @@ void MainGUI::draw(){
 	}
 
 	//ImGui::ShowDemoWindow();
-
-	if(imgui) imgui->end();
-
-	//if(imgui) gui->draw(); //actually render
 }
+
+void MainGUI::guiBegin(){
+	if(imgui) imgui->begin();
+}
+
+void MainGUI::guiEnd(){
+	if(imgui) imgui->end();
+}
+
+void MainGUI::guiDraw(){
+	if(imgui) imgui->draw();
+}
+
 
 void MainGUI::updateNumWarps(int n){
 

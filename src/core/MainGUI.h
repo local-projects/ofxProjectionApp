@@ -8,7 +8,6 @@
 
 #pragma once
 #include "ofMain.h"
-#include "ofxDatGui.h"
 #include "ofxNotificationCenter.h"
 #include "IDManager.h"
 #include "ofxImGui.h"
@@ -19,9 +18,8 @@ public:
     ~MainGUI();
     
     void setup(vector<string> &appStates, string _currentDirectory);
-    void update();
-    void draw();
-    
+
+
     /*
      Cropping Interface
      */
@@ -30,6 +28,12 @@ public:
     /*
      Gui Object
      */
+	void guiBegin();
+	void runGui();
+	void guiEnd();
+
+	void guiDraw();
+
     void toggleGuiVisiblity();
 	bool isGuiVisible(){return showImgui;}
 	void setGuiVisible(bool v){showImgui = v;}
@@ -42,6 +46,8 @@ public:
      Directory Management
      */
     string getCurrentDirectory();
+
+	float getRetinaDpi(){return retinaDpi;}
     
 private:
     
@@ -84,7 +90,7 @@ private:
 	void setupImGui();
 	float retinaDpi = 1.0;
 	bool showImgui = true;
-	float cropInterfaceSize = 1.0;
+	float cropInterfaceSize = 0.5;
 	float cropY = 0;
 	float cropX = 0;
 	float cropWidth_ = 1;

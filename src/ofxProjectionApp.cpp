@@ -61,8 +61,6 @@ void ofxProjectionApp::setupWarps()
             int _numWarps = ProjectorManager::one().projectors[i]->numWarps;
             for(int j = 0; j < _numWarps; j++)
             {
-                
-                
                 if(perspective)
                 {
                     warp = warpController->buildWarp<ofxWarpPerspectiveBilinear>();
@@ -71,7 +69,7 @@ void ofxProjectionApp::setupWarps()
                     
                     //Edges are the alphas?
                     warp->setEdges(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-                    warp->setGamma(glm::vec3(100.0f, 100.0f, 100.0f));
+                    warp->setGamma(glm::vec3(2.0f, 2.0f, 2.0f));
                     /*
                      //Set up control points for each warp such that the warps are distributed
                      evently across each projector. Assuming that only x pos needs to change
@@ -82,8 +80,7 @@ void ofxProjectionApp::setupWarps()
                      Make sure all values are normalized (i.e 0 to 1) and not the actualy pixel height and pixel width.
                      */
                     // Top left control point
-                    
-                    
+
                     float xPos_l = projectorOrigin.x + (ProjectorManager::one().projectors[i]->size.x/ProjectorManager::one().projectors[i]->numWarps)*j;
                     xPos_l = xPos_l/appSize.x;
                     xPos_l = xPos_l/scaleDenominator;
@@ -91,8 +88,7 @@ void ofxProjectionApp::setupWarps()
                     float xPos_r = projectorOrigin.x + (ProjectorManager::one().projectors[i]->size.x/ProjectorManager::one().projectors[i]->numWarps)*(j + 1);
                     xPos_r = xPos_r/appSize.x;
                     xPos_r = xPos_r/scaleDenominator;
-                    
-                    
+
                     glm::vec2 tl = glm::vec2(xPos_l, 0.0f);
                     glm::vec2 tr = glm::vec2(xPos_l, 1.0f);
                     glm::vec2 bl = glm::vec2(xPos_r, 0.0f);
@@ -115,7 +111,7 @@ void ofxProjectionApp::setupWarps()
                     
                     //Edges are the alphas?
                     warp->setEdges(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-                    warp->setGamma(glm::vec3(100.0f, 100.0f, 100.0f));
+                    warp->setGamma(glm::vec3(2.0f, 2.0f, 2.0f));
                     /*
                      //Set up control points for each warp such that the warps are distributed
                      evently across each projector. Assuming that only x pos needs to change
@@ -150,12 +146,8 @@ void ofxProjectionApp::setupWarps()
                     
                     ofLogNotice("ofxProjectionApp") << warpController->getNumWarps() << "-xPos_l, xPos_r: " << xPos_l << " ," << xPos_r;
                 }
-
-                
             }
-            
         }
-
 		setupCroppingManager(); 
 
     }
@@ -183,10 +175,7 @@ void ofxProjectionApp::setupWarps()
      Set up callbacks for notification center.
      */
     ofxNotificationCenter::one().addObserver(this, &ofxProjectionApp::onSaveSettings, IDManager::one().saveProjSetting_id);
-    
     ofxNotificationCenter::one().addObserver(this, &ofxProjectionApp::onLoadSettings, IDManager::one().loadProjSetting_id);
-    
-    ofxNotificationCenter::one().addObserver(this, &ofxProjectionApp::onCloseEdgeBlendGui, IDManager::one().edgeBlendGui_id);
         
     
     //setupCroppingManager();
@@ -237,18 +226,15 @@ void ofxProjectionApp::setupGuiManager(vector<string> &appStates)
     guiMan->setup(appStates, directoryPath);
 }
 
-void ofxProjectionApp::update()
-{
+void ofxProjectionApp::update(){
+
+	guiMan->guiBegin();
 
 	//disable warp mouse when messing with imgui
 	if(guiMan->getCaptureMouse()){
 		warpController->setIgnoreMouseInteractions(true);
 	}else{
-		switch(guiState){
-			case GUIStates::EDGE_BLEND_GUI_OPEN: warpController->setIgnoreMouseInteractions(true); break;
-			case GUIStates::EDGE_BLEND_GUIS_CLOSED: warpController->setIgnoreMouseInteractions(false); break;
-			default: break;
-		}
+		warpController->setIgnoreMouseInteractions(false);
 	}
 
     //Update Edge blending params
@@ -259,12 +245,14 @@ void ofxProjectionApp::update()
 		guiMan->updateNumWarps(newNumWarp);
 	}
 
-    for(int i =0; i < warpController->getNumWarps(); i++)
-    {
-        auto warp = warpController->getWarp(i);
+    for(int i =0; i < warpController->getNumWarps(); i++){
+
+		auto warp = warpController->getWarp(i);
         
-		if (warp && i < edgeGuis.size())
-		{
+		if (warp && i < edgeGuis.size()){
+
+			edgeGuis[i]->runGui(guiMan->getRetinaDpi());
+
 			//Edge Blending
 			warp->setGamma(edgeGuis[i]->getGamma());
 			warp->setEdges(edgeGuis[i]->getEdges());
@@ -272,7 +260,9 @@ void ofxProjectionApp::update()
 		}     
     }
 
-	if(guiMan) guiMan->update();
+	guiMan->runGui();
+
+	guiMan->guiEnd();
 }
 
 void ofxProjectionApp::draw()
@@ -319,31 +309,12 @@ void ofxProjectionApp::draw()
 			warp->end();
 		}
     }
+	guiMan->guiDraw();
 
-	if(guiMan) guiMan->draw();
 }
 
 #pragma mark GUI STATES
 
-void ofxProjectionApp::setGuiState(GUIStates _guiState)
-{
-    guiState = _guiState;
-    
-    switch(guiState)
-    {
-        case GUIStates::EDGE_BLEND_GUI_OPEN:
-        {
-            warpController->setIgnoreMouseInteractions(true);
-            break;
-        }
-        case GUIStates::EDGE_BLEND_GUIS_CLOSED:
-        {
-            warpController->setIgnoreMouseInteractions(false);
-            break;
-        }
-        default: break;
-    }
-}
 
 void ofxProjectionApp::setCropManagerVisible(bool visiblity)
 {
@@ -497,9 +468,8 @@ void ofxProjectionApp::onMousePressed(ofMouseEventArgs & args)
             auto warp = warpController->getWarp(i);
             if(warp->isEditing())
             {
-                edgeGuis[i]->getGuiObject()->setPosition(args.x, args.y);
-                edgeGuis[i]->getGuiObject()->setVisible(true);
-                setGuiState(GUIStates::EDGE_BLEND_GUI_OPEN);
+                edgeGuis[i]->setPosition(args.x, args.y);
+                edgeGuis[i]->setVisible(true);
             }
         }
     }
@@ -540,27 +510,6 @@ void ofxProjectionApp::onKeyReleased(ofKeyEventArgs &args)
       
 }
 
-void ofxProjectionApp::onCloseEdgeBlendGui(ofxNotificationCenter::Notification& n)
-{
-    string notificationID = n.ID; //the notification ID is available to you
-    int index = n.data["index"]; //get what you need from the data field
-    
-    ofLogNotice("ofxProjectionApp::onCloseEdgeBlendGui") << "Close edgeBlend Gui # " << index;
-    
-    edgeGuis[index]->getGuiObject()->setVisible(false);
-    
-    //Check to see if all the GUIs are closed and reset the warp controllers mouse interaction state
-    
-    for(auto & gui : edgeGuis)
-    {
-        if(gui->getGuiObject()->getVisible())
-        {
-            return;
-        }
-    }
-    
-    setGuiState(GUIStates::EDGE_BLEND_GUIS_CLOSED);
-}
 
 #pragma mark SAVING
 void ofxProjectionApp::saveCurrentSettings()
@@ -613,11 +562,8 @@ void ofxProjectionApp::loadWarpSettings()
         if(numWarps > ProjectorManager::one().numWarps)
         {
             //Update projector manager
-            ProjectorManager::one().addProjector(ProjectorManager::one().projectors.size(),
-                                                 1,
-                                                 warp->getSize());
+            ProjectorManager::one().addProjector(ProjectorManager::one().projectors.size(), 1, warp->getSize());
         }
-
     }
     
     //Update data in projector manager
@@ -778,11 +724,11 @@ void ofxProjectionApp::addWarp(ofxWarp::WarpBase::Type type, ofVec2f size, ofVec
         }
         default: break;
     }
-    
-    warp->setSize(size);
-    warp->setEdges(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    warp->setGamma(glm::vec3(100.0f, 100.0f, 100.0f));
-    
+	
+	warp->setSize(size);
+	warp->setEdges(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	warp->setGamma(glm::vec3(2.0f, 2.0f, 2.0f));
+
     /*
      Make sure all values are normalized (i.e 0 to 1) and not the actualy pixel height and pixel width.
      */
