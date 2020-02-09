@@ -237,6 +237,7 @@ void ofxProjectionApp::update(){
 		warpController->setIgnoreMouseInteractions(false);
 	}
 
+
     //Update Edge blending params
 
 	int newNumWarp = warpController->getNumWarps();
@@ -245,10 +246,16 @@ void ofxProjectionApp::update(){
 		guiMan->updateNumWarps(newNumWarp);
 	}
 
+	vector<bool> warpVis = guiMan->getWarpVisibility();
+
     for(int i =0; i < warpController->getNumWarps(); i++){
 
 		auto warp = warpController->getWarp(i);
-        
+
+		if(!warpVis[i] && warp->isEditing()){
+			warp->setEditing(false);
+		}
+
 		if (warp && i < edgeGuis.size()){
 
 			edgeGuis[i]->runGui(guiMan->getRetinaDpi());
