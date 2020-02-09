@@ -18,6 +18,7 @@ public:
     ~MainGUI();
     
     void setup(vector<string> &appStates, string _currentDirectory);
+	void setCurrentState(string state);
 
 
     /*
@@ -42,6 +43,7 @@ public:
 	vector<bool> getWarpVisibility(){return warpVisible;};
 
 	bool getCaptureMouse();
+	bool getImguiTextFocus();
     /*
      Directory Management
      */
@@ -55,7 +57,6 @@ private:
      Gui Object
      */
 	ofxImGui::Gui * imgui  = nullptr;
-
     
     /*
      Callbacks

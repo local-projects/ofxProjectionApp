@@ -48,6 +48,11 @@ public:
      */
     void saveCurrentSettings();
 
+	//gui state
+	bool getCaptureMouse(); //true if mouse is on top of imgui windows
+	bool getImguiTextFocus(); //true if text field is focused
+	void setGuiStateToWarp();
+
     /*
      GUI Visibility
      */
@@ -59,6 +64,8 @@ public:
 	Warping
 	*/
 	void toggleEditingWarpsOff();
+	void enterWarpMode();
+	bool isWarpMode();
     
     //Add warp to the warp controller on the fly and cascade change to other classes
     void addWarp(ofxWarp::WarpBase::Type type, ofVec2f size, ofVec2f pos);

@@ -226,6 +226,14 @@ void ofxProjectionApp::setupGuiManager(vector<string> &appStates)
     guiMan->setup(appStates, directoryPath);
 }
 
+bool ofxProjectionApp::getCaptureMouse(){
+	return guiMan->getCaptureMouse();
+}
+
+bool ofxProjectionApp::getImguiTextFocus(){
+	return guiMan->getImguiTextFocus();
+}
+
 void ofxProjectionApp::update(){
 
 	guiMan->guiBegin();
@@ -702,9 +710,20 @@ void ofxProjectionApp::loadNewSettings()
 
 #pragma mark WARPS
 
-void ofxProjectionApp::toggleEditingWarpsOff()
-{
+void ofxProjectionApp::toggleEditingWarpsOff(){
 	warpController->turnEditingOff(); 
+}
+
+void ofxProjectionApp::enterWarpMode(){
+	warpController->turnEditingOn();
+}
+
+bool ofxProjectionApp::isWarpMode(){
+	return warpController->areWarpsInEditMode();
+}
+
+void ofxProjectionApp::setGuiStateToWarp(){
+	guiMan->setCurrentState("WARP_CONFIGURATION");
 }
 
 //Add warp to the warp controller on the fly and cascade change to other classes
