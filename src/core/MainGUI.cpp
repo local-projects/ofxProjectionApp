@@ -78,6 +78,8 @@ void MainGUI::setupImGui(){
 	ImGui::StyleColorsDark(&darkStyle);
 	*style = darkStyle;
 	style->FrameRounding = 5;
+	style->DisplayWindowPadding.x = 300 * retinaDpi;
+	style->DisplayWindowPadding.y = 200 * retinaDpi;
 
 	ImGui::GetIO().MouseDrawCursor = false;
 }
@@ -92,7 +94,7 @@ void MainGUI::runGui(){
 
 		ImGui::SetNextWindowContentWidth(500 * retinaDpi);
 
-		ImGui::Begin("Mapping", &showImgui, ImGuiWindowFlags_AlwaysAutoResize); /////////////////////////////////////////////
+		ImGui::Begin("Mapping", nullptr, ImGuiWindowFlags_AlwaysAutoResize); /////////////////////////////////////////////
 
 		ImGui::PushItemWidth(-230 * retinaDpi);
 
@@ -357,7 +359,7 @@ bool MainGUI::getCaptureMouse(){
 }
 
 bool MainGUI::getImguiTextFocus(){
-	return ImGui::GetIO().WantTextInput;;
+	return ImGui::GetIO().WantTextInput;
 }
 
 #pragma mark GUI OBJECT
