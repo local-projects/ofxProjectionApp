@@ -324,6 +324,7 @@ void ofxProjectionApp::draw()
 			warp->end();
 		}
     }
+	warpController->draw();
 	guiMan->guiDraw();
 
 }
