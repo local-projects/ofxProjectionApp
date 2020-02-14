@@ -267,9 +267,11 @@ void MainGUI::runGui(){
 			ImGui::Text(
 				"## APP COMMANDS ######################\n"
 				"\n"
-				"   press 't' to toggle fullscreen mode\n"
+				"   press 'x' to set Mapping Mode\n"
+				"   press 'o' to set Active Mode (allows all key commands)\n"
+				"   press 't' to toggle Fullscreen Mode\n"
+				"   press 'S' to cycle through Window Modes\n"
 				"   press '.' in windowed mode to correct the window aspect ratio.\n"
-				"   press 'x' to toggle Mapping window\n"
 				"   press 'z' to toggle debug info\n"
 				"   press 'Z' to toggle assets & players debug info\n"
 				"   press 'h' to hide all media objects\n"

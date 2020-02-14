@@ -256,7 +256,7 @@ void ofxProjectionApp::update(){
 
 	vector<bool> warpVis = guiMan->getWarpVisibility();
 
-    for(int i =0; i < warpController->getNumWarps(); i++){
+    for(int i = 0; i < warpController->getNumWarps(); i++){
 
 		auto warp = warpController->getWarp(i);
 
