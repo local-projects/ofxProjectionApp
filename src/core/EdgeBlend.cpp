@@ -49,8 +49,12 @@ void EdgeBlend::runGui(float retina){
 		//ImGui::PushItemWidth(-200 * retina);
 
 		static float inc = 0.0001;
-		ImGui::DragFloat("Gamma", &gamma, 0.05f,  0.01f, 10.0f, "%.7f");
-		ImGui::DragFloat("Exponent", &exponent, 0.025f,  0.6f, 3.5f, "%.7f");
+		static float in2 = 0.02;
+		ImGui::Separator();
+		ImGui::SliderFloat("Slider Increment Curve", &in2, 0.0001f, 0.01, "%.6f");
+		ImGui::Separator();
+		ImGui::DragFloat("Gamma", &gamma, in2,  0.01f, 10.0f, "%.7f");
+		ImGui::DragFloat("Exponent", &exponent, in2,  0.6f, 3.5f, "%.7f");
 		ImGui::Separator();
 		ImGui::SliderFloat("Slider Increment", &inc, 0.00000001f, 0.0003, "%.6f");
 		ImGui::Separator();

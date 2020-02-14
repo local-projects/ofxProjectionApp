@@ -302,6 +302,8 @@ void MainGUI::runGui(){
 			   	"   left-click near a ctrl point to select it\n"
 				"   hold shift while selecting a ctrl point to extend selection\n"
 				"   hold shift and left-click on a ctrl point to deselect it\n"
+				"   hold 's' to Rectangular Marquee selection\n"
+				"   hold shift while Rectangular Marquee selection to extend selection\n"
 				"   left-click and drag near a selected ctrl-point to move it\n"
 				"   left-click + alt + drag on a ctrl point to select and move at once\n"
 				"   use arrow keys to move selected control points\n"
